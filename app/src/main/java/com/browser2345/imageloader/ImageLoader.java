@@ -18,16 +18,32 @@ import java.util.concurrent.Executors;
 public class ImageLoader {
     // 图片的缓存
     private ImageCache mImageCache;
+    private DiskCache mDiskCache;
+    private DoubleCache mDoubleCache;
     private ExecutorService mExecutorService;
+
+    private boolean isUseDiskCache = false;
+    private boolean isUseDoubleCache = false;
 
     public ImageLoader() {
         mImageCache = new ImageCache();
+        mDiskCache = new DiskCache();
+        mDoubleCache = new DoubleCache();
         mExecutorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
 
     public void displayImage(final String url, final ImageView imageView) {
         if (imageView != null && URLUtil.isValidUrl(url)) {
-            Bitmap bitmap = mImageCache.get(url);
+            Bitmap bitmap = null;
+
+            if (isUseDoubleCache){
+                bitmap = mDoubleCache.get(url);
+            } else if (isUseDiskCache){
+                bitmap = mDiskCache.get(url);
+            } else {
+                bitmap = mImageCache.get(url);
+            }
+
             if(bitmap != null){
                 imageView.setImageBitmap(bitmap);
             } else {
@@ -47,7 +63,8 @@ public class ImageLoader {
                                 }
                             });
                         }
-                        mImageCache.put(url, bitmap);
+                        mDoubleCache.put(url, bitmap);
+
                     }
                 });
             }
@@ -67,5 +84,13 @@ public class ImageLoader {
         }
 
         return bitmap;
+    }
+
+    public void setUseDiskCache(boolean useDiskCache) {
+        isUseDiskCache = useDiskCache;
+    }
+
+    public void setUseDoubleCache(boolean useDoubleCache) {
+        isUseDoubleCache = useDoubleCache;
     }
 }

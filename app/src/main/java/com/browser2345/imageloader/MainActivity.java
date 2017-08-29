@@ -34,5 +34,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mImageLoader = new ImageLoader();
+//        mImageLoader.setUseDoubleCache(true);
+        mImageLoader.setUseDiskCache(true);
     }
 }
